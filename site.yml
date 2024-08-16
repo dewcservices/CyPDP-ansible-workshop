@@ -1,0 +1,29 @@
+---
+- name: Install Docker and run Nginx
+  hosts: localhost
+  become: yes
+
+  roles:
+    - install_docker
+
+  tasks:
+    - name: Copy file locally
+      copy:
+        src: hello-world.html
+        dest: /tmp/index.html
+    - name: Create default containers
+      community.docker.docker_container:
+        name: "nginx"
+        image: "nginx:alpine"
+        state: started
+        ports: 8080:80
+        restart_policy: always
+    - name: Copy file into nginx
+      community.docker.docker_container_copy_into:
+        path: /tmp/index.html
+        container: nginx
+        container_path: /usr/share/nginx/html/index.html
+        owner_id: 0
+        group_id: 0
+        mode: 0755
+    
